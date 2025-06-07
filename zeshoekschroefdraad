@@ -1,0 +1,54 @@
+// Dit OpenSCAD-script maakt een 3D-zeshoekig object met een centraal gat
+// voorzien van interne schroefdraad, met behulp van de 'threads.scad' bibliotheek.
+// Het kan worden geopend in OpenSCAD om het 3D-model te visualiseren en exporteren.
+
+// BELANGRIJKE OPMERKING:
+// Voor dit script is de 'threads.scad' bibliotheek vereist.
+// Download deze van bijvoorbeeld GitHub (zoek naar "threads.scad openscad")
+// en plaats het bestand in dezelfde map als dit .scad bestand,
+// of in een bibliotheekmap die OpenSCAD kent.
+
+// --- Parameters ---
+// Breedte van de zeshoek van vlak naar vlak (mm)
+// De gebruiker heeft 50mm opgegeven.
+breedte_vlak_naar_vlak = 50;
+
+// Dikte van het zeshoekige object (mm)
+// De gebruiker heeft 30mm opgegeven.
+dikte = 30;
+
+// Nominale diameter van het centrale gat (mm). Dit wordt de nominale diameter
+// voor de schroefdraad (bijv. M20).
+gat_diameter = 20;
+
+// --- Schroefdraad parameters ---
+// Spoed (pitch) van de schroefdraad (mm). Standaard M20 grof is 2.5mm.
+schroefdraad_spoed = 2.5;
+
+// --- Inladen van de schroefdraad bibliotheek ---
+// Zorg ervoor dat 'threads.scad' in dezelfde map staat of in een bekende bibliotheekmap.
+use <threads.scad>;
+
+// --- Berekeningen ---
+// Voor een regelmatige zeshoek is de straal (radius) van de omgeschreven cirkel
+// gerelateerd aan de breedte van vlak naar vlak (apothem) door de formule:
+// breedte_vlak_naar_vlak = 2 * straal_zeshoek * cos(30 graden)
+// Dus, straal_zeshoek = breedte_vlak_naar_vlak / (2 * cos(30 graden))
+// De straal die hieruit volgt, is de afstand van het midden tot de punten van de zeshoek.
+straal_zeshoek_buitenkant = breedte_vlak_naar_vlak / (2 * cos(30));
+
+// --- Constructie van het object ---
+// Gebruik 'difference()' om de schroefdraad uit het zeshoekige hoofdlichaam te snijden.
+difference() {
+    // Hoofdlichaam van de zeshoek: een cilinder met 6 zijden.
+    // 'h' is de hoogte (dikte).
+    // 'r' is de berekende straal.
+    // '$fn = 6' zorgt ervoor dat het een zeshoek is.
+    // 'center = true' centreert het object op de oorsprong (0,0,0).
+    cylinder(h = dikte, r = straal_zeshoek_buitenkant, $fn = 6, center = true);
+
+    // Gebruik de 'thread_insert' functie uit de threads.scad bibliotheek.
+    // Deze module creëert een holte die perfect overeenkomt met de interne schroefdraad.
+    // parameters: (diameter, spoed, lengte, type, intern)
+    thread_insert(gat_diameter, schroefdraad_spoed, dikte, type="metric", internal=true);
+}
